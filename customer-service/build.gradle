@@ -26,6 +26,11 @@ dependencies {
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.0.4'
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
+	implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.4'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.5.3'
+	implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.3.Final'
 }
 
 tasks.named('test') {
