@@ -11,12 +11,11 @@ import ro.dragomiralin.ridesharing.trip.dto.DriverRequestEvent;
 @Service
 @RequiredArgsConstructor
 public class TripProducer {
-    private final NewTopic tripRequests;
+    private final NewTopic driverRequests;
     private final KafkaTemplate<String, DriverRequestEvent> kafkaTemplate;
-
 
     public void sendDriverRequest(DriverRequestEvent driverRequestEvent) {
         log.info("Sending trip request event: {}", driverRequestEvent);
-        kafkaTemplate.send(tripRequests.name(), driverRequestEvent);
+        kafkaTemplate.send(driverRequests.name(), driverRequestEvent);
     }
 }

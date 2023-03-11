@@ -33,5 +33,17 @@ public class TripService {
         tripProducer.sendDriverRequest(driverRequestEventMapper.toDriverRequestEvent(tripDTO));
     }
 
+    public void updateTripDriver(long tripId, long driverId) {
+        Trip trip = get(tripId);
+        trip.setDriverId(driverId);
+        trip.setStatus(TripStatus.DRIVER_ACCEPTED);
+        tripRepository.save(trip);
+    }
+
+    public Trip get(long id) {
+        return tripRepository.findById(id)
+                .orElseThrow();
+    }
+
 
 }

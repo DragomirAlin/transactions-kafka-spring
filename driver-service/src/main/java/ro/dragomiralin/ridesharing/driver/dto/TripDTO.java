@@ -1,7 +1,6 @@
-package ro.dragomiralin.ridesharing.trip.dto;
+package ro.dragomiralin.ridesharing.driver.dto;
 
 import lombok.Builder;
-import ro.dragomiralin.ridesharing.trip.domain.TripStatus;
 
 import java.time.Instant;
 

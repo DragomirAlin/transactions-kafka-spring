@@ -39,7 +39,7 @@ services:
     restart: always
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=broker:9092
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=localhost:9092
 volumes:
   db:
     driver: local

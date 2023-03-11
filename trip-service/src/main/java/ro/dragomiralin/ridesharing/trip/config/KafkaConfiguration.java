@@ -28,7 +28,7 @@ public class KafkaConfiguration {
 
     @Bean
     public NewTopic driverConfirmation() {
-        return TopicBuilder.name(DRIVER_CONFIRMATION)
+        return TopicBuilder.name(DRIVER_ACCEPTED)
                 .partitions(3)
                 .replicas(1)
                 .build();
