@@ -21,9 +21,9 @@ public class TripService {
 
     public void requestTrip(TripRequest tripRequest) {
         Trip trip = Trip.builder()
-                .customerId(tripRequest.getCustomerId())
-                .startLocation(tripRequest.getStartLocation())
-                .endLocation(tripRequest.getEndLocation())
+                .customerId(tripRequest.customerId())
+                .startLocation(tripRequest.startLocation())
+                .endLocation(tripRequest.endLocation())
                 .status(TripStatus.DRIVER_REQUESTED)
                 .build();
 
