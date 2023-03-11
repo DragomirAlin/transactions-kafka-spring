@@ -5,12 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
+import static ro.dragomiralin.ridesharing.trip.config.KafkaTopics.*;
+
 @Configuration
 public class KafkaConfiguration {
 
     @Bean
     public NewTopic tripRequests() {
-        return TopicBuilder.name("tripRequests")
+        return TopicBuilder.name(TRIP_REQUESTS)
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -18,7 +20,7 @@ public class KafkaConfiguration {
 
     @Bean
     public NewTopic driverRequests() {
-        return TopicBuilder.name("driverRequests")
+        return TopicBuilder.name(DRIVER_REQUESTS)
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -26,7 +28,7 @@ public class KafkaConfiguration {
 
     @Bean
     public NewTopic driverConfirmation() {
-        return TopicBuilder.name("driverRequests")
+        return TopicBuilder.name(DRIVER_CONFIRMATION)
                 .partitions(3)
                 .replicas(1)
                 .build();
