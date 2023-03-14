@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
-public class KafkaConfiguration {
+public class KafkaTopicsConfig {
 
     @Bean
     public NewTopic driversTopic() {
