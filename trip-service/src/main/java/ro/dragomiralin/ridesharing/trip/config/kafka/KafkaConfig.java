@@ -1,4 +1,4 @@
-package ro.dragomiralin.ridesharing.driver.config;
+package ro.dragomiralin.ridesharing.trip.config.kafka;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +16,7 @@ import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
 import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import ro.dragomiralin.ridesharing.driver.dto.DriverAcceptedEvent;
-import ro.dragomiralin.ridesharing.driver.dto.DriverRequestEvent;
+import ro.dragomiralin.ridesharing.trip.dto.DriverAcceptedEvent;
 
 @EnableKafka
 @Configuration
@@ -68,7 +67,7 @@ public class KafkaConfig {
         typeMapper.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
         typeMapper.addTrustedPackages("*");
         Map<String, Class<?>> mappings = new HashMap<>();
-        mappings.put("driverRequest", DriverRequestEvent.class);
+        mappings.put("driverAccepted", DriverAcceptedEvent.class);
         typeMapper.setIdClassMapping(mappings);
         converter.setTypeMapper(typeMapper);
         return converter;

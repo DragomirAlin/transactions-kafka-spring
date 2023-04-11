@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
+import ro.dragomiralin.ridesharing.driver.config.KafkaTopics;
 import ro.dragomiralin.ridesharing.driver.dto.DriverAcceptedEvent;
 import ro.dragomiralin.ridesharing.driver.dto.DriverRequestEvent;
 
@@ -12,12 +13,9 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class DriverRequestConsumer {
-    public static final String DRIVER_ACCEPTED = "driver-accepted";
-    public static final String DRIVER_REQUESTS = "driver-requests";
 
-
-    @KafkaListener(topics = DRIVER_REQUESTS, groupId = "driver")
-    @SendTo(DRIVER_ACCEPTED)
+    @KafkaListener(topics = KafkaTopics.DRIVER_REQUESTS, groupId = KafkaTopics.GROUP_ID)
+    @SendTo(KafkaTopics.DRIVER_ACCEPTED)
     public DriverAcceptedEvent consume(DriverRequestEvent driverRequestEvent) {
         log.info("Received trip request with id: {}", driverRequestEvent.getEventId());
 

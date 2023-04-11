@@ -1,4 +1,4 @@
-package ro.dragomiralin.ridesharing.trip.config;
+package ro.dragomiralin.ridesharing.trip.config.db;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
