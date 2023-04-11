@@ -15,7 +15,7 @@ import java.util.UUID;
 public class DriverRequestConsumer {
 
     @KafkaListener(topics = KafkaTopics.DRIVER_REQUESTS, groupId = KafkaTopics.GROUP_ID)
-    @SendTo(KafkaTopics.DRIVER_ACCEPTED)
+//    @SendTo(KafkaTopics.DRIVER_ACCEPTED)
     public DriverAcceptedEvent consume(DriverRequestEvent driverRequestEvent) {
         log.info("Received trip request with id: {}", driverRequestEvent.getEventId());
 

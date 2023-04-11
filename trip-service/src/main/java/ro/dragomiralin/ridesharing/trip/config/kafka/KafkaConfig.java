@@ -2,91 +2,74 @@ package ro.dragomiralin.ridesharing.trip.config.kafka;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.IntegerDeserializer;
+import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
-import org.springframework.kafka.support.converter.StringJsonMessageConverter;
-import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
-import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import ro.dragomiralin.ridesharing.trip.dto.DriverAcceptedEvent;
+import ro.dragomiralin.ridesharing.trip.dto.DriverRequestEvent;
 
-@EnableKafka
+import java.util.Map;
+
 @Configuration
+@EnableKafka
+@EnableConfigurationProperties(KafkaProperties.class)
+@RequiredArgsConstructor
 public class KafkaConfig {
-    @Value(value = "${spring.kafka.bootstrap-servers}")
-    private String bootstrapAddress;
+    private final KafkaProperties properties;
+    private final ObjectProvider<RecordMessageConverter> messageConverterProvider;
 
-    public ConsumerFactory<String, String> consumerFactory(String groupId) {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520");
-        props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520");
-        return new DefaultKafkaConsumerFactory<>(props);
+    @Bean
+    public KafkaTemplate<String, DriverRequestEvent> jsonKafkaTemplate(ProducerFactory<String, DriverRequestEvent> jsonProducerFactory) {
+        KafkaTemplate<String, DriverRequestEvent> kafkaTemplate = new KafkaTemplate<>(jsonProducerFactory);
+        RecordMessageConverter messageConverter = messageConverterProvider.getIfUnique();
+        if (messageConverter != null) {
+            kafkaTemplate.setMessageConverter(messageConverter);
+        }
+        return kafkaTemplate;
     }
 
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(String groupId) {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory(groupId));
+    @Bean
+    public ProducerFactory<String, DriverRequestEvent> jsonProducerFactory() {
+        Map<String, Object> producerProperties = this.properties.buildProducerProperties();
+        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
+        DefaultKafkaProducerFactory<String, DriverRequestEvent> factory = new DefaultKafkaProducerFactory<>(producerProperties);
+        String transactionIdPrefix = this.properties.getProducer().getTransactionIdPrefix();
+        if (transactionIdPrefix != null) {
+            factory.setTransactionIdPrefix(transactionIdPrefix);
+        }
         return factory;
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> fooKafkaListenerContainerFactory() {
-        return kafkaListenerContainerFactory(KafkaTopics.GROUP_ID);
+    public ConsumerFactory<String, DriverAcceptedEvent> jsonKafkaConsumerFactory() {
+        Map<String, Object> consumerProperties = this.properties.buildConsumerProperties();
+        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());
+        consumerProperties.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        return new DefaultKafkaConsumerFactory<>(consumerProperties);
     }
 
-    public ConsumerFactory<String, DriverAcceptedEvent> greetingConsumerFactory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, KafkaTopics.GROUP_ID);
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(DriverAcceptedEvent.class));
-    }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DriverAcceptedEvent> greetingKafkaListenerContainerFactory() {
+    @Bean("jsonKafkaListenerContainerFactory")
+    ConcurrentKafkaListenerContainerFactory<String, DriverAcceptedEvent> jsonKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, DriverAcceptedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(greetingConsumerFactory());
-        return factory;
-    }
-
-    @Bean
-    public RecordMessageConverter multiTypeConverter() {
-        StringJsonMessageConverter converter = new StringJsonMessageConverter();
-        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
-        typeMapper.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
-        typeMapper.addTrustedPackages("*");
-        Map<String, Class<?>> mappings = new HashMap<>();
-        mappings.put("driverAccepted", DriverAcceptedEvent.class);
-        typeMapper.setIdClassMapping(mappings);
-        converter.setTypeMapper(typeMapper);
-        return converter;
-    }
-
-    @Bean
-    public ConsumerFactory<String, Object> multiTypeConsumerFactory() {
-        HashMap<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> multiTypeKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(multiTypeConsumerFactory());
-        factory.setMessageConverter(multiTypeConverter());
+        factory.setConsumerFactory(jsonKafkaConsumerFactory());
         return factory;
     }
 }

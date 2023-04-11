@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class DriverRequestEvent {
+public class DriverRequestEvent implements Serializable {
     private UUID eventId;
     private TripDTO tripDTO;
 
